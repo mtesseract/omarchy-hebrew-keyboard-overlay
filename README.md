@@ -27,8 +27,9 @@ Omarchy theme. It can be moved with the mouse and reopens at the same place.
 
 - Omarchy 4.x (with `omarchy-shell` and the `omarchy plugin` commands)
 - Hebrew (`il`) among your Hyprland keyboard layouts (see below)
-- `libxkbcommon` (`xkbcli`) and `noto-fonts` (Noto Sans Hebrew). Install any
-  that are missing with `omarchy pkg add <name>`.
+- `libxkbcommon` (`xkbcli`), `noto-fonts` (Noto Sans Hebrew) and `libnotify`
+  (`notify-send`, for error notifications). Install any that are missing with
+  `omarchy pkg add <name>`.
 
 ## Install
 
