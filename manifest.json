@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 1,
+  "id": "silverratio.hebrew-keyboard-overlay",
+  "name": "Hebrew Keyboard Overlay",
+  "version": "1.0.0",
+  "author": "mtesseract",
+  "license": "MIT",
+  "description": "Shows the Hebrew keyboard layout, including niqqud, for typing Hebrew on a keyboard without Hebrew keycaps",
+  "kinds": [
+    "overlay"
+  ],
+  "keepLoaded": true,
+  "entryPoints": {
+    "overlay": "HebrewKeyboard.qml"
+  }
+}
