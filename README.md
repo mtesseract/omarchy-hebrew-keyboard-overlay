@@ -7,6 +7,8 @@ It is an [Omarchy](https://omarchy.org) shell plugin that shows the Hebrew
 keyboard layout as an overlay on the screen. The overlay doesn't take keyboard
 focus, so you can keep typing while it is open.
 
+![The overlay with the Osaka Jade theme](screenshots/osaka-jade.png)
+
 Each key shows:
 
 - the Hebrew character, with its name (shin, final kaf, …), including niqqud
@@ -16,6 +18,10 @@ Each key shows:
 The keyboard is drawn from your Hyprland keyboard configuration, including
 layout variants such as `il(phonetic)`, and uses the colors of the current
 Omarchy theme. It can be moved with the mouse and reopens at the same place.
+
+| Tokyo Night | Catppuccin Latte | Gruvbox |
+| --- | --- | --- |
+| ![Tokyo Night](screenshots/tokyo-night.png) | ![Catppuccin Latte](screenshots/catppuccin-latte.png) | ![Gruvbox](screenshots/gruvbox.png) |
 
 ## Requirements
 
@@ -87,6 +93,11 @@ Settings go on the plugin's entry in the `plugins` list of
 | --- | --- | --- |
 | `keyboard` | `ansi` or `iso` (a file name in `keyboards/`): the shape of your physical keyboard. ISO keyboards (common in Europe) have an extra key left of Z and the backslash key next to Enter. | `ansi` |
 | `labels` | The layout printed on your keycaps, for the small labels in the bottom-left corner of each key, e.g. `us` if you type Dvorak on QWERTY keycaps. | your first non-Hebrew layout in `kb_layout`, with its variant |
+
+An ISO keyboard with German keycaps (`de,il` in `kb_layout` and
+`"keyboard": "iso"`):
+
+![ISO keyboard with German key labels](screenshots/iso-de.png)
 
 Changes apply when the shell reloads `shell.json`; if they don't show, run
 `omarchy restart shell`.
