@@ -6,8 +6,8 @@ import QtQuick
 import "Keymap.js" as Keymap
 
 // Shows the Hebrew keyboard layout of the active Hyprland keyboard. It slides up
-// on the focused monitor, never takes keyboard focus, and can be dragged; the
-// position is kept across sessions.
+// on the focused monitor, never takes keyboard focus, and can be dragged and
+// resized; position and size are kept across sessions.
 Item {
   id: root
 
@@ -16,8 +16,9 @@ Item {
   // The keyboard is on screen: true while open and while the slide-out plays.
   property bool shown: false
 
-  // Width of the overlay as a fraction of the monitor width.
+  // Width of the overlay as a fraction of the monitor width; resizing changes it.
   property real widthFraction: 0.72
+  property real minWidthFraction: 0.45
   // Gap between the default position and the bottom edge of the monitor.
   property int bottomMargin: 24
   property int slideInDuration: 150
@@ -63,9 +64,10 @@ Item {
     altgr: theme.bright_yellow || theme.yellow || theme.accent || "#cacccc"
   })
 
-  // Top-left corner of the overlay on its monitor, kept across sessions.
+  // Kept across sessions: the top-left corner of the overlay on its monitor
+  // (x, y) and its widthFraction (width).
   property string statePath: Quickshell.env("HOME") + "/.local/state/omarchy/hebrew-keyboard-overlay.json"
-  property var savedPosition: null
+  property var savedState: null
 
   // The surface stays mapped while hidden (empty and click-through). Mapping it
   // on open would play Hyprland's layer fade over the slide-in.
@@ -199,15 +201,15 @@ Item {
   function restingPosition() {
     var maxX = Math.max(0, panel.width - card.width)
     var maxY = Math.max(0, panel.height - card.height)
-    var p = root.savedPosition
+    var p = root.savedState
     if (p && typeof p.x === "number" && typeof p.y === "number")
       return { x: Math.min(Math.max(0, p.x), maxX), y: Math.min(Math.max(0, p.y), maxY) }
     return { x: maxX / 2, y: Math.max(0, maxY - root.bottomMargin) }
   }
 
-  function savePosition() {
-    root.savedPosition = { x: Math.round(card.x), y: Math.round(card.y) }
-    stateFile.setText(JSON.stringify(root.savedPosition))
+  function saveState() {
+    root.savedState = { x: Math.round(card.x), y: Math.round(card.y), width: root.widthFraction }
+    stateFile.setText(JSON.stringify(root.savedState))
   }
 
   Region { id: cardRegion; item: card }
@@ -219,7 +221,8 @@ Item {
     atomicWrites: true
     printErrors: false
     onLoaded: {
-      try { root.savedPosition = JSON.parse(text()) } catch (e) { root.savedPosition = null }
+      try { root.savedState = JSON.parse(text()) } catch (e) { root.savedState = null }
+      if (root.savedState && root.savedState.width > 0) root.widthFraction = root.savedState.width
     }
   }
 
@@ -305,8 +308,12 @@ Item {
 
     Item {
       id: card
-      width: Math.round(panel.width * root.widthFraction)
-      height: Math.round(width * keyboard.height / keyboard.width)
+      readonly property real aspect: keyboard.width / keyboard.height
+      readonly property real minWidth: panel.width * root.minWidthFraction
+      // The widest that fits the monitor.
+      readonly property real maxWidth: Math.min(panel.width, panel.height * aspect)
+      width: Math.round(Math.min(Math.max(panel.width * root.widthFraction, minWidth), maxWidth))
+      height: Math.round(width / aspect)
       y: panel.height
       visible: root.shown
 
@@ -348,7 +355,48 @@ Item {
           if (slideInAnimation.running) slideInAnimation.complete()
         }
         onPositionChanged: if (drag.active) dragged = true
-        onReleased: if (dragged) root.savePosition()
+        onReleased: if (dragged) root.saveState()
+      }
+
+      // Dragging the top-right corner resizes the keyboard around its bottom-left
+      // corner, keeping its proportions; the state is saved only after a drag.
+      MouseArea {
+        property bool resized: false
+        // At the press: from the pointer to the right edge, and the bottom edge.
+        property real grabOffset: 0
+        property real bottomEdge: 0
+        anchors { right: parent.right; top: parent.top }
+        width: 24
+        height: 24
+        clip: true
+        enabled: root.opened
+        cursorShape: Qt.SizeBDiagCursor
+        onPressed: function(mouse) {
+          resized = false
+          if (slideInAnimation.running) slideInAnimation.complete()
+          grabOffset = card.width - mapToItem(card, mouse.x, mouse.y).x
+          bottomEdge = card.y + card.height
+        }
+        onPositionChanged: function(mouse) {
+          var width = mapToItem(card, mouse.x, mouse.y).x + grabOffset
+          // Stay on the monitor.
+          var fits = Math.min(panel.width - card.x, bottomEdge * card.aspect)
+          root.widthFraction = Math.max(card.minWidth, Math.min(width, fits)) / panel.width
+          card.y = Math.max(0, bottomEdge - card.height)
+          resized = true
+        }
+        onReleased: if (resized) root.saveState()
+
+        // The corner mark: a square, clipped to a triangle.
+        Rectangle {
+          width: 20
+          height: 20
+          x: parent.width - width / 2
+          y: -height / 2
+          rotation: 45
+          antialiasing: true
+          color: root.colors.border
+        }
       }
     }
 

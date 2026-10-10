@@ -17,7 +17,8 @@ Each key shows:
 
 The keyboard is drawn from your Hyprland keyboard configuration, including
 layout variants such as `il(phonetic)`, and uses the colors of the current
-Omarchy theme. It can be moved with the mouse and reopens at the same place.
+Omarchy theme. It can be moved and resized with the mouse and reopens at the
+same place and size.
 
 | Tokyo Night | Catppuccin Latte | Gruvbox |
 | --- | --- | --- |
@@ -106,9 +107,11 @@ Changes apply when the shell reloads `shell.json`; if they don't show, run
 ## Usage
 
 - Your keybinding shows and hides the overlay.
-- Drag it with the left mouse button to move it. The position is saved in
+- Drag it with the left mouse button to move it.
+- Drag its top-right corner to resize it.
+- Position and size are saved in
   `~/.local/state/omarchy/hebrew-keyboard-overlay.json`; delete that file to
-  return to the default position above the bottom edge.
+  return to the default size and the default position above the bottom edge.
 
 ## Update / uninstall
 
